@@ -1,13 +1,14 @@
 import DiskUsage from "./DiskUsage";
 
 async function getDiskUsage() {
-	const res = await fetch(`http://localhost:8080/disks`, {
-		next: { revalidate: 10 }
+	const res = await fetch(`http://backend:8080/disks`, {
+		next: { revalidate: 10 },
+		cache: 'no-store'
 	});
 	if (!res.ok) {
-		throw new Error("Failed to fetch disk usage");
+		return {};
 	}
-	return res.json();
+	return await res.json();
 }
 
 export default async function DiskUsagePage() {

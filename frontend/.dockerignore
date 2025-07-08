@@ -1,0 +1,4 @@
+.env
+kangaroo/node_modules
+.git
+kangaroo/.next
