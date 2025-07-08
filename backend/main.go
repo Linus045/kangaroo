@@ -51,6 +51,7 @@ func diskUsage(c *gin.Context) {
 		})
 	}
 	c.IndentedJSON(http.StatusOK, DiskUsage{Disks: disks})
+	fmt.Printf("Serving disk usage on /disks\n")
 }
 
 func main() {

@@ -3,12 +3,22 @@
 import { useState } from "react";
 
 
-export default function DiskUsage({ disks }) {
+type Disk = {
+	filesystem: string;
+	type: string;
+	used: number;
+	available: number;
+	size: number;
+	mountpath: string;
+};
+
+
+export default function DiskUsage({ disks }: { disks: { disks: Disk[] } }) {
 	const [hideSpecial, setHideSpecial] = useState(true);
 	const specialFilesystems = ["tmpfs", "efivarfs", "proc", "sysfs", "devtmpfs", "devpts", "cgroup", "cgroup2", "securityfs", "pstore", "debugfs"];
 
 	const filteredDisks = disks.disks.filter(
-		disk => !hideSpecial || !specialFilesystems.includes(disk.type)
+		(disk: Disk) => !hideSpecial || !specialFilesystems.includes(disk.type)
 	).sort((a, b) => {
 		return a.filesystem.localeCompare(b.filesystem);
 	});
@@ -53,7 +63,7 @@ export default function DiskUsage({ disks }) {
 	);
 }
 
-function formatBytes(bytes) {
+function formatBytes(bytes: number) {
 	if (bytes === 0) return "0 B";
 	const k = 1024;
 	const sizes = ["B", "KB", "MB", "GB", "TB", "PB"];

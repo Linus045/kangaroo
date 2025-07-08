@@ -11,7 +11,7 @@ async function getDiskUsage() {
 }
 
 export default async function DiskUsagePage() {
-	let diskUsage = await getDiskUsage()
+	const diskUsage = await getDiskUsage()
 
 	return (
 
