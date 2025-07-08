@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/shirou/gopsutil/disk"
 	"net/http"
+	// human "github.com/dustin/go-humanize"
 )
 
 func test(c *gin.Context) {
@@ -12,10 +15,10 @@ func test(c *gin.Context) {
 }
 
 type DiskInfo struct {
-	MountPath  string `json:"mount_path"`
-	Size       string `json:"size"`
-	Used       string `json:"used"`
-	Available  string `json:"available"`
+	MountPath  string `json:"mountpath"`
+	Size       uint64 `json:"size"`
+	Used       uint64 `json:"used"`
+	Available  uint64 `json:"available"`
 	Type       string `json:"type"`
 	Filesystem string `json:"filesystem"`
 }
@@ -26,29 +29,34 @@ type DiskUsage struct {
 
 func diskUsage(c *gin.Context) {
 
-	disks := []DiskInfo{
-		{
-			MountPath:  "/",
-			Size:       "100G",
-			Used:       "50G",
-			Available:  "50G",
-			Type:       "ext4",
-			Filesystem: "/dev/sda1",
-		},
-		{
-			MountPath:  "/home",
-			Size:       "400G",
-			Used:       "54G",
-			Available:  "346G",
-			Type:       "ext4",
-			Filesystem: "/dev/sda2",
-		},
+	var disks = []DiskInfo{}
+
+	parts, _ := disk.Partitions(true)
+	for _, p := range parts {
+		device := p.Mountpoint
+		s, _ := disk.Usage(device)
+
+		if s == nil || s.Total == 0 {
+			continue
+		}
+		fmt.Printf("%s %d\n", p.Device, s.Total)
+
+		disks = append(disks, DiskInfo{
+			MountPath:  p.Mountpoint,
+			Size:       s.Total,
+			Used:       s.Used,
+			Available:  s.Free,
+			Type:       p.Fstype,
+			Filesystem: p.Device,
+		})
 	}
 	c.IndentedJSON(http.StatusOK, DiskUsage{Disks: disks})
 }
 
 func main() {
-	// fmt.Println("Hello, World!")
+
+	formatter := "%-14s %7s %7s %7s %4s %s\n"
+	fmt.Printf(formatter, "Filesystem", "Size", "Used", "Avail", "Use%", "Mounted on")
 
 	router := gin.Default()
 	router.GET("/test", test)
